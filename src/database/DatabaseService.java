@@ -9,34 +9,29 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Serviciu generic de tip singleton pentru scrierea si citirea din baza de date (PostgreSQL via JDBC).
- *
- * - singleton: o singura instanta, deci o singura conexiune partajata in toata aplicatia.
- * - generic: metoda {@link #query} poate citi orice tip de obiect printr-un {@link RowMapper}.
- *
- * Toate DAO-urile (ClientDAO, SoferDAO, etc.) folosesc acest serviciu pentru a vorbi cu baza de date.
- */
+// Generic singleton service for reading from and writing to the database (PostgreSQL via JDBC).
+// Singleton: one shared connection for the whole app. Generic: query() can read any type via a RowMapper.
+// All DAOs go through this class to talk to the database.
 public class DatabaseService {
 
-    // Datele de conectare. Postgres local foloseste "trust auth", deci parola este goala.
+    // Connection details. Local Postgres uses "trust" auth, so the password is empty.
     private static final String URL = "jdbc:postgresql://localhost:5432/fooddelivery";
     private static final String USER = "stoicavlad";
-    private static final String PASSWORD = ""; // schimba aici daca pui parola pe rol
+    private static final String PASSWORD = ""; // change here if you set a password on the role
 
     private static DatabaseService instance;
     private final Connection connection;
 
-    // constructor privat => nimeni nu poate face "new DatabaseService()" din afara (pattern singleton)
+    // private constructor so nobody can do "new DatabaseService()" from outside (singleton)
     private DatabaseService() {
         try {
             this.connection = DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
-            throw new RuntimeException("Nu m-am putut conecta la baza de date: " + e.getMessage(), e);
+            throw new RuntimeException("Could not connect to the database: " + e.getMessage(), e);
         }
     }
 
-    /** Punctul unic de acces la instanta singleton. */
+    // single access point to the singleton instance
     public static synchronized DatabaseService getInstance() {
         if (instance == null) {
             instance = new DatabaseService();
@@ -44,18 +39,12 @@ public class DatabaseService {
         return instance;
     }
 
-    /**
-     * Interfata generica de mapare: transforma un rand din ResultSet intr-un obiect de tip T.
-     * Fiecare DAO isi defineste propriul RowMapper.
-     */
+    // Turns one row from a ResultSet into an object of type T. Each DAO defines its own mapper.
     public interface RowMapper<T> {
         T map(ResultSet rs) throws SQLException;
     }
 
-    /**
-     * Citire generica (READ): ruleaza un SELECT si returneaza o lista de obiecte T.
-     * Parametrii (?) din SQL sunt completati in ordine din {@code params}.
-     */
+    // Generic read: runs a SELECT and returns a list of objects. The ? placeholders are filled from params.
     public <T> List<T> query(String sql, RowMapper<T> mapper, Object... params) {
         List<T> rezultate = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -66,14 +55,12 @@ public class DatabaseService {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Eroare la interogare: " + sql + " -> " + e.getMessage(), e);
+            throw new RuntimeException("Query failed: " + sql + " -> " + e.getMessage(), e);
         }
         return rezultate;
     }
 
-    /**
-     * Scriere generica pentru INSERT: ruleaza comanda si returneaza id-ul generat (cheia primara SERIAL).
-     */
+    // Write for INSERT: runs the statement and returns the generated id (the SERIAL primary key).
     public int insert(String sql, Object... params) {
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             bindParams(ps, params);
@@ -84,20 +71,18 @@ public class DatabaseService {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Eroare la insert: " + sql + " -> " + e.getMessage(), e);
+            throw new RuntimeException("Insert failed: " + sql + " -> " + e.getMessage(), e);
         }
         return -1;
     }
 
-    /**
-     * Scriere generica pentru UPDATE / DELETE: returneaza numarul de randuri afectate.
-     */
+    // Write for UPDATE / DELETE: returns the number of affected rows.
     public int update(String sql, Object... params) {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             bindParams(ps, params);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Eroare la update: " + sql + " -> " + e.getMessage(), e);
+            throw new RuntimeException("Update failed: " + sql + " -> " + e.getMessage(), e);
         }
     }
 

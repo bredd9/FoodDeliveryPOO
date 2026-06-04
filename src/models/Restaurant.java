@@ -19,10 +19,9 @@ public class Restaurant implements Comparable<Restaurant> {
     public void adaugaProdus(Produs p) { this.meniu.add(p); }
     public List<Produs> getMeniu() { return meniu; }
 
-    // sortare alfabetica dupa nume pentru a putea fi pus in TreeSet (sortare implicita la .add)
+    // sort alphabetically by name, so it can be kept sorted inside a TreeSet
     @Override
     public int compareTo(Restaurant altRestaurant) {
-        System.out.println("Compar " + this.nume + " cu " + altRestaurant.nume);
         return this.nume.compareTo(altRestaurant.nume);
     }
 

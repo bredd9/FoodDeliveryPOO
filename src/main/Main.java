@@ -12,7 +12,7 @@ public class Main {
         RestaurantService restaurantService = new RestaurantService();
         OrderService orderService = new OrderService();
 
-        // creeare utilizatori
+        // create users
         Adresa adresa1 = new Adresa("Bucuresti", "Str. Victoriei");
         Client client1 = new Client(1, "Ion Popescu", "0722000000", adresa1);
         Sofer sofer1 = new Sofer(2, "Marian", "0733000000", "B-100-ABC");
@@ -20,7 +20,7 @@ public class Main {
         userService.adaugaUtilizator(client1);
         userService.adaugaUtilizator(sofer1);
 
-        // creeare restaurante si produse
+        // create restaurants and products
         Restaurant burgerShop = new Restaurant("Burger Shop");
         Restaurant asianWok = new Restaurant("Asian Wok");
 
@@ -34,45 +34,44 @@ public class Main {
 
         restaurantService.afiseazaRestaurante();
 
-        // plasare comanda
+        // place an order
         Comanda comanda1 = orderService.plaseazaComanda(client1, burgerShop, Arrays.asList(p1, p2));
 
-        // procesare plata
+        // process the payment
         orderService.proceseazaPlata(comanda1, "Card Bancar");
 
-        // cautam un sofer disponibil prin UserService si il alocam prin OrderService
+        // find an available driver and assign it to the order
         Sofer soferDisponibil = userService.gasesteSoferDisponibil();
         orderService.alocaSofer(comanda1, soferDisponibil);
 
-        // finalizare comanda (elibereaza si soferul, persistat in DB)
+        // finalize the order (also frees up the driver, saved to the DB)
         orderService.finalizeazaComanda(comanda1);
 
-        // istoric
+        // order history
         orderService.istoricComenziClient(client1);
 
-        // ====== DEMONSTRATIE CRUD (Etapa II) ======
+        // ====== CRUD demonstration (Stage II) ======
         System.out.println("\n=== Demonstratie CRUD prin DAO-uri (JDBC) ===");
 
-        // READ: citim clientul inapoi din baza de date dupa id
+        // READ: load the client back from the DB by id
         userService.getClientDAO().read(client1.getId()).ifPresent(c ->
                 System.out.println("READ client #" + c.getId() + ": " + c.getNume() + " - " + c.getTelefon()));
 
-        // UPDATE: schimbam numarul de telefon al clientului
-        client1.setNume(client1.getNume()); // numele ramane
+        // UPDATE: change the client's phone number
         Client clientActualizat = userService.getClientDAO().read(client1.getId()).orElse(client1);
         userService.getClientDAO().update(
                 new Client(clientActualizat.getId(), clientActualizat.getNume(), "0799999999", clientActualizat.getAdresaLivrare()));
         userService.getClientDAO().read(client1.getId()).ifPresent(c ->
                 System.out.println("UPDATE client #" + c.getId() + " -> telefon nou: " + c.getTelefon()));
 
-        // CREATE + DELETE: adaugam un restaurant temporar, apoi il stergem
+        // CREATE + DELETE: add a temporary restaurant, then remove it
         Restaurant temp = new Restaurant("Restaurant Temporar");
         restaurantService.getRestaurantDAO().create(temp);
         System.out.println("CREATE restaurant #" + temp.getId() + " (" + temp.getNume() + ")");
         restaurantService.getRestaurantDAO().delete(temp.getId());
         System.out.println("DELETE restaurant #" + temp.getId());
 
-        // READ ALL: listam toate comenzile din baza de date
+        // READ ALL: list all orders from the DB
         System.out.println("Comenzi in baza de date: " + orderService.getComandaDAO().readAll().size());
     }
 }

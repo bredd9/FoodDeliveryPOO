@@ -13,8 +13,8 @@ public class RestaurantService {
     private final AuditService audit = AuditService.getInstance();
 
     public void adaugaRestaurant(Restaurant r) {
-        restaurante.add(r);   // compareTo
-        restaurantDAO.create(r);   // persistare in DB (seteaza id-ul generat pe obiect)
+        restaurante.add(r);        // sorted via compareTo
+        restaurantDAO.create(r);   // persist to the DB (sets the generated id on the object)
         audit.logActiune("adaugaRestaurant");
     }
 
@@ -32,6 +32,6 @@ public class RestaurantService {
         }
     }
 
-    /** Acces la DAO pentru demonstratia CRUD din Main. */
+    // DAO access for the CRUD demo in Main
     public RestaurantDAO getRestaurantDAO() { return restaurantDAO; }
 }

@@ -7,7 +7,7 @@ public class Sofer extends Utilizator {
     public Sofer(int id, String nume, String telefon, String numarInmatriculare) {
         super(id, nume, telefon);
         this.numarInmatriculare = numarInmatriculare;
-        this.disponibil = true; // implicit disponibil
+        this.disponibil = true; // available by default
     }
 
     public boolean isDisponibil() { return disponibil; }

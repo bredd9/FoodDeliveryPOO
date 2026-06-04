@@ -5,12 +5,12 @@ import models.Restaurant;
 import java.util.List;
 import java.util.Optional;
 
-/** DAO cu operatii CRUD pentru entitatea Restaurant. */
+// CRUD operations for the Restaurant entity.
 public class RestaurantDAO implements Dao<Restaurant> {
 
     private final DatabaseService db = DatabaseService.getInstance();
 
-    // transforma un rand din tabel intr-un obiect Restaurant
+    // turns a table row into a Restaurant object
     private final DatabaseService.RowMapper<Restaurant> mapper = rs -> {
         Restaurant r = new Restaurant(rs.getString("nume"));
         r.setId(rs.getInt("id"));

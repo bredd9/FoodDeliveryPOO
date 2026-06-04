@@ -6,12 +6,12 @@ import models.Client;
 import java.util.List;
 import java.util.Optional;
 
-/** DAO cu operatii CRUD pentru entitatea Client (adresa este aplatizata in coloanele oras/strada). */
+// CRUD operations for the Client entity (the address is flattened into the oras/strada columns).
 public class ClientDAO implements Dao<Client> {
 
     private final DatabaseService db = DatabaseService.getInstance();
 
-    // reconstruieste Client + Adresa din rand
+    // rebuilds the Client + its Adresa from a row
     private final DatabaseService.RowMapper<Client> mapper = rs -> {
         Adresa adresa = new Adresa(rs.getString("oras"), rs.getString("strada"));
         Client c = new Client(rs.getInt("id"), rs.getString("nume"), rs.getString("telefon"), adresa);

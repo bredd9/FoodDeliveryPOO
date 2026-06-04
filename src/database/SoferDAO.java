@@ -5,7 +5,7 @@ import models.Sofer;
 import java.util.List;
 import java.util.Optional;
 
-/** DAO cu operatii CRUD pentru entitatea Sofer. */
+// CRUD operations for the Sofer (driver) entity.
 public class SoferDAO implements Dao<Sofer> {
 
     private final DatabaseService db = DatabaseService.getInstance();

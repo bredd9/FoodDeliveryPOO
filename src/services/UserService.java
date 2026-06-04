@@ -11,7 +11,7 @@ import java.util.List;
 public class UserService {
     private List<Utilizator> utilizatori = new ArrayList<>();
 
-    // DAO-uri pentru persistenta + serviciul de audit
+    // DAOs for persistence + the audit service
     private final ClientDAO clientDAO = new ClientDAO();
     private final SoferDAO soferDAO = new SoferDAO();
     private final AuditService audit = AuditService.getInstance();
@@ -19,7 +19,7 @@ public class UserService {
     public void adaugaUtilizator(Utilizator u) {
         utilizatori.add(u);
 
-        // persistam in baza de date in functie de tipul concret (mostenire + polimorfism)
+        // persist to the DB based on the concrete type (inheritance + polymorphism)
         if (u instanceof Client) {
             clientDAO.create((Client) u);
         } else if (u instanceof Sofer) {
@@ -38,10 +38,10 @@ public class UserService {
                 }
             }
         }
-        return null; // Nu am gasit niciunul liber
+        return null; // none available
     }
 
-    /** Acces la DAO pentru demonstratia CRUD din Main. */
+    // DAO access for the CRUD demo in Main
     public ClientDAO getClientDAO() { return clientDAO; }
     public SoferDAO getSoferDAO() { return soferDAO; }
 }

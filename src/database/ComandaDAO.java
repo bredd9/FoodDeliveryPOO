@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * DAO cu operatii CRUD pentru entitatea Comanda.
- * Comanda are chei straine catre client, restaurant si (optional) sofer.
- * Plata este aplatizata in coloanele total / metoda_plata.
- */
+// CRUD operations for the Comanda (order) entity.
+// An order has foreign keys to client, restaurant and (optionally) driver.
+// The payment is flattened into the total / metoda_plata columns.
 public class ComandaDAO implements Dao<Comanda> {
 
     private final DatabaseService db = DatabaseService.getInstance();
@@ -20,12 +18,12 @@ public class ComandaDAO implements Dao<Comanda> {
     private final RestaurantDAO restaurantDAO = new RestaurantDAO();
     private final SoferDAO soferDAO = new SoferDAO();
 
-    // reconstruieste Comanda urmarind cheile straine prin celelalte DAO-uri
+    // rebuilds the order by following its foreign keys through the other DAOs
     private final DatabaseService.RowMapper<Comanda> mapper = rs -> {
         int clientId = rs.getInt("client_id");
         int restaurantId = rs.getInt("restaurant_id");
 
-        // produsele nu sunt persistate separat -> lista goala; totalul autoritativ vine din coloana "total"
+        // products aren't stored separately -> empty list; the real total comes from the "total" column
         Comanda c = new Comanda(
                 clientDAO.read(clientId).orElse(null),
                 restaurantDAO.read(restaurantId).orElse(null),

@@ -16,6 +16,7 @@ public class Restaurant implements Comparable<Restaurant> {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getNume() { return nume; }
+    public void setNume(String nume) { this.nume = nume; }
     public void adaugaProdus(Produs p) { this.meniu.add(p); }
     public List<Produs> getMeniu() { return meniu; }
 

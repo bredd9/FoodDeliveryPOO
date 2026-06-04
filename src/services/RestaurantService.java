@@ -23,6 +23,15 @@ public class RestaurantService {
         audit.logActiune("adaugaProdusInMeniu");
     }
 
+    // rename keeps the DB and the sorted TreeSet in sync: remove, rename, re-add (so it re-sorts), then UPDATE
+    public void redenumesteRestaurant(Restaurant r, String numeNou) {
+        restaurante.remove(r);     // remove using the old name (its current sort key)
+        r.setNume(numeNou);
+        restaurante.add(r);        // re-insert so the TreeSet re-sorts by the new name
+        restaurantDAO.update(r);   // persist the change to the DB
+        audit.logActiune("redenumesteRestaurant");
+    }
+
     public void afiseazaRestaurante() {
         audit.logActiune("afiseazaRestaurante");
         System.out.println("\n--- Restaurante Partenere ---");

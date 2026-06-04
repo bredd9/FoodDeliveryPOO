@@ -185,15 +185,12 @@ public class Meniu {
     }
 
     private void actualizeazaRestaurant() {
-        listeazaRestauranteDinDB();
-        int id = citesteInt("Id restaurant de redenumit: ");
-        restaurantService.getRestaurantDAO().read(id).ifPresentOrElse(r -> {
-            String numeNou = citesteString("Nume nou: ");
-            Restaurant actualizat = new Restaurant(numeNou);
-            actualizat.setId(id);
-            restaurantService.getRestaurantDAO().update(actualizat);
-            System.out.println("Restaurant #" + id + " redenumit in '" + numeNou + "'.");
-        }, () -> System.out.println("Nu exista restaurant cu id " + id));
+        Restaurant r = alegeRestaurant();
+        if (r == null) return;
+        String numeNou = citesteString("Nume nou: ");
+        // updates the in-memory TreeSet AND the DB, so "Afiseaza restaurante" reflects the new name
+        restaurantService.redenumesteRestaurant(r, numeNou);
+        System.out.println("Restaurant #" + r.getId() + " redenumit in '" + numeNou + "'.");
     }
 
     private void stergeRestaurant() {

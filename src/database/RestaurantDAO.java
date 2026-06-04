@@ -1,0 +1,47 @@
+package database;
+
+import models.Restaurant;
+
+import java.util.List;
+import java.util.Optional;
+
+/** DAO cu operatii CRUD pentru entitatea Restaurant. */
+public class RestaurantDAO implements Dao<Restaurant> {
+
+    private final DatabaseService db = DatabaseService.getInstance();
+
+    // transforma un rand din tabel intr-un obiect Restaurant
+    private final DatabaseService.RowMapper<Restaurant> mapper = rs -> {
+        Restaurant r = new Restaurant(rs.getString("nume"));
+        r.setId(rs.getInt("id"));
+        return r;
+    };
+
+    @Override
+    public Restaurant create(Restaurant r) {
+        int id = db.insert("INSERT INTO restaurant (nume) VALUES (?)", r.getNume());
+        r.setId(id);
+        return r;
+    }
+
+    @Override
+    public Optional<Restaurant> read(int id) {
+        List<Restaurant> rez = db.query("SELECT * FROM restaurant WHERE id = ?", mapper, id);
+        return rez.stream().findFirst();
+    }
+
+    @Override
+    public List<Restaurant> readAll() {
+        return db.query("SELECT * FROM restaurant ORDER BY nume", mapper);
+    }
+
+    @Override
+    public void update(Restaurant r) {
+        db.update("UPDATE restaurant SET nume = ? WHERE id = ?", r.getNume(), r.getId());
+    }
+
+    @Override
+    public void delete(int id) {
+        db.update("DELETE FROM restaurant WHERE id = ?", id);
+    }
+}

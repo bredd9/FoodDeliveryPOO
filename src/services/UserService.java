@@ -31,6 +31,20 @@ public class UserService {
         return clienti;
     }
 
+    // delete a client from both the DB and the in-memory list
+    public void stergeClient(int id) {
+        clientDAO.delete(id);
+        utilizatori.removeIf(u -> u instanceof Client && u.getId() == id);
+        audit.logActiune("stergeClient");
+    }
+
+    // delete a driver from both the DB and the in-memory list
+    public void stergeSofer(int id) {
+        soferDAO.delete(id);
+        utilizatori.removeIf(u -> u instanceof Sofer && u.getId() == id);
+        audit.logActiune("stergeSofer");
+    }
+
     public void adaugaUtilizator(Utilizator u) {
         utilizatori.add(u);
 

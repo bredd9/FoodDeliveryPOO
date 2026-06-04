@@ -63,6 +63,7 @@ public class Meniu {
         System.out.println("4) Gaseste sofer disponibil");
         System.out.println("5) Actualizeaza telefon client");
         System.out.println("6) Sterge client");
+        System.out.println("7) Sterge sofer");
         switch (citesteInt("Alege: ")) {
             case 1: adaugaClient(); break;
             case 2: adaugaSofer(); break;
@@ -70,6 +71,7 @@ public class Meniu {
             case 4: gasesteSofer(); break;
             case 5: actualizeazaClient(); break;
             case 6: stergeClient(); break;
+            case 7: stergeSofer(); break;
             default: System.out.println("Optiune invalida.");
         }
     }
@@ -129,8 +131,19 @@ public class Meniu {
         listeazaUtilizatoriDinDB();
         int id = citesteInt("Id client de sters: ");
         try {
-            userService.getClientDAO().delete(id);
+            userService.stergeClient(id); // sterge din DB + memorie
             System.out.println("Client #" + id + " sters.");
+        } catch (RuntimeException e) {
+            System.out.println("Nu pot sterge (are comenzi asociate?). " + e.getMessage());
+        }
+    }
+
+    private void stergeSofer() {
+        listeazaUtilizatoriDinDB();
+        int id = citesteInt("Id sofer de sters: ");
+        try {
+            userService.stergeSofer(id); // sterge din DB + memorie
+            System.out.println("Sofer #" + id + " sters.");
         } catch (RuntimeException e) {
             System.out.println("Nu pot sterge (are comenzi asociate?). " + e.getMessage());
         }
@@ -193,7 +206,7 @@ public class Meniu {
         listeazaRestauranteDinDB();
         int id = citesteInt("Id restaurant de sters: ");
         try {
-            restaurantService.getRestaurantDAO().delete(id);
+            restaurantService.stergeRestaurant(id); // sterge din DB + memorie
             System.out.println("Restaurant #" + id + " sters.");
         } catch (RuntimeException e) {
             System.out.println("Nu pot sterge (are comenzi asociate?). " + e.getMessage());

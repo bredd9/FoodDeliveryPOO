@@ -30,6 +30,13 @@ public class RestaurantService {
         audit.logActiune("adaugaProdusInMeniu");
     }
 
+    // delete a restaurant from both the DB and the in-memory TreeSet
+    public void stergeRestaurant(int id) {
+        restaurantDAO.delete(id);
+        restaurante.removeIf(r -> r.getId() == id);
+        audit.logActiune("stergeRestaurant");
+    }
+
     // rename keeps the DB and the sorted TreeSet in sync: remove, rename, re-add (so it re-sorts), then UPDATE
     public void redenumesteRestaurant(Restaurant r, String numeNou) {
         restaurante.remove(r);     // remove using the old name (its current sort key)

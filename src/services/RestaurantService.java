@@ -12,6 +12,13 @@ public class RestaurantService {
     private final RestaurantDAO restaurantDAO = new RestaurantDAO();
     private final AuditService audit = AuditService.getInstance();
 
+    // load existing restaurants from the DB into the sorted set (called once at startup)
+    public void incarcaDinDB() {
+        restaurante.addAll(restaurantDAO.readAll());
+    }
+
+    public Set<Restaurant> getRestaurante() { return restaurante; }
+
     public void adaugaRestaurant(Restaurant r) {
         restaurante.add(r);        // sorted via compareTo
         restaurantDAO.create(r);   // persist to the DB (sets the generated id on the object)

@@ -18,6 +18,13 @@ public class OrderService {
     private final SoferDAO soferDAO = new SoferDAO();
     private final AuditService audit = AuditService.getInstance();
 
+    // load existing orders from the DB into memory (called once at startup)
+    public void incarcaDinDB() {
+        comenzi.addAll(comandaDAO.readAll());
+    }
+
+    public List<Comanda> getComenzi() { return comenzi; }
+
     public Comanda plaseazaComanda(Client client, Restaurant restaurant, List<Produs> produse) {
         Comanda comanda = new Comanda(client, restaurant, produse);
         comenzi.add(comanda);
@@ -69,8 +76,11 @@ public class OrderService {
         audit.logActiune("istoricComenziClient");
         System.out.println("\n--- Istoric Comenzi pentru " + client.getNume() + " ---");
         for (Comanda c : comenzi) {
-            if (c.getClient().equals(client)) {
-                System.out.println("Comanda #" + c.getId() + " - Status: " + c.getStatus() + " - Total: " + c.calculeazaTotal() + " RON");
+            // compare by id: orders loaded from the DB are different object instances than the selected client
+            if (c.getClient() != null && c.getClient().getId() == client.getId()) {
+                // orders loaded from the DB have no products in memory, so use the stored payment total when available
+                double total = (c.getPlata() != null) ? c.getPlata().getSuma() : c.calculeazaTotal();
+                System.out.println("Comanda #" + c.getId() + " - Status: " + c.getStatus() + " - Total: " + total + " RON");
             }
         }
     }

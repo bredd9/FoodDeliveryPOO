@@ -16,6 +16,21 @@ public class UserService {
     private final SoferDAO soferDAO = new SoferDAO();
     private final AuditService audit = AuditService.getInstance();
 
+    // load existing users from the DB into memory (called once at startup)
+    public void incarcaDinDB() {
+        utilizatori.addAll(clientDAO.readAll());
+        utilizatori.addAll(soferDAO.readAll());
+    }
+
+    // only the clients from the user list (used for selection in the menu)
+    public List<Client> getClienti() {
+        List<Client> clienti = new ArrayList<>();
+        for (Utilizator u : utilizatori) {
+            if (u instanceof Client) clienti.add((Client) u);
+        }
+        return clienti;
+    }
+
     public void adaugaUtilizator(Utilizator u) {
         utilizatori.add(u);
 

@@ -21,12 +21,6 @@ public class Meniu {
     private final OrderService orderService;
     private final Scanner scanner = new Scanner(System.in);
 
-    // in-memory objects created during this session, so they can be picked by number
-    private final List<Client> clienti = new ArrayList<>();
-    private final List<Sofer> soferi = new ArrayList<>();
-    private final List<Restaurant> restaurante = new ArrayList<>();
-    private final List<Comanda> comenzi = new ArrayList<>();
-
     public Meniu(UserService userService, RestaurantService restaurantService, OrderService orderService) {
         this.userService = userService;
         this.restaurantService = restaurantService;
@@ -34,6 +28,11 @@ public class Meniu {
     }
 
     public void start() {
+        // load existing data from the DB so it shows up and can be selected across runs
+        userService.incarcaDinDB();
+        restaurantService.incarcaDinDB();
+        orderService.incarcaDinDB();
+
         boolean ruleaza = true;
         while (ruleaza) {
             System.out.println("\n=== PLATFORMA FOOD DELIVERY ===");
@@ -82,7 +81,6 @@ public class Meniu {
         String strada = citesteString("Strada: ");
         Client c = new Client(0, nume, telefon, new Adresa(oras, strada));
         userService.adaugaUtilizator(c); // persista in DB + audit, seteaza id-ul
-        clienti.add(c);
         System.out.println("Client adaugat cu id " + c.getId());
     }
 
@@ -92,7 +90,6 @@ public class Meniu {
         String numar = citesteString("Numar inmatriculare: ");
         Sofer s = new Sofer(0, nume, telefon, numar);
         userService.adaugaUtilizator(s);
-        soferi.add(s);
         System.out.println("Sofer adaugat cu id " + s.getId());
     }
 
@@ -163,7 +160,6 @@ public class Meniu {
         String nume = citesteString("Nume restaurant: ");
         Restaurant r = new Restaurant(nume);
         restaurantService.adaugaRestaurant(r); // persista + audit, intra in TreeSet sortat
-        restaurante.add(r);
         System.out.println("Restaurant adaugat cu id " + r.getId());
     }
 
@@ -258,7 +254,6 @@ public class Meniu {
         if (produse.isEmpty()) { System.out.println("Comanda fara produse, anulata."); return; }
 
         Comanda c = orderService.plaseazaComanda(client, restaurant, produse);
-        comenzi.add(c);
         System.out.println("Total comanda: " + c.calculeazaTotal() + " RON");
     }
 
@@ -319,15 +314,11 @@ public class Meniu {
         Sofer sofer1 = new Sofer(0, "Marian", "0733000000", "B-100-ABC");
         userService.adaugaUtilizator(client1);
         userService.adaugaUtilizator(sofer1);
-        clienti.add(client1);
-        soferi.add(sofer1);
 
         Restaurant burgerShop = new Restaurant("Burger Shop");
         Restaurant asianWok = new Restaurant("Asian Wok");
         restaurantService.adaugaRestaurant(burgerShop);
         restaurantService.adaugaRestaurant(asianWok);
-        restaurante.add(burgerShop);
-        restaurante.add(asianWok);
 
         Produs p1 = new Produs("Cheeseburger", 35.5);
         Produs p2 = new Produs("Cartofi Prajiti", 12.0);
@@ -337,7 +328,6 @@ public class Meniu {
         restaurantService.afiseazaRestaurante();
 
         Comanda comanda1 = orderService.plaseazaComanda(client1, burgerShop, Arrays.asList(p1, p2));
-        comenzi.add(comanda1);
         orderService.proceseazaPlata(comanda1, "Card Bancar");
         Sofer soferDisponibil = userService.gasesteSoferDisponibil();
         orderService.alocaSofer(comanda1, soferDisponibil);
@@ -346,9 +336,10 @@ public class Meniu {
         System.out.println("Comenzi in baza de date: " + orderService.getComandaDAO().readAll().size());
     }
 
-    // ---------- helpers selectie ----------
+    // ---------- helpers selectie (citesc din colectiile serviciilor) ----------
     private Client alegeClient() {
-        if (clienti.isEmpty()) { System.out.println("Nu exista clienti in sesiune. Adauga unul intai."); return null; }
+        List<Client> clienti = userService.getClienti();
+        if (clienti.isEmpty()) { System.out.println("Nu exista clienti. Adauga unul intai."); return null; }
         for (int i = 0; i < clienti.size(); i++) {
             System.out.println("  " + (i + 1) + ") " + clienti.get(i).getNume());
         }
@@ -358,7 +349,8 @@ public class Meniu {
     }
 
     private Restaurant alegeRestaurant() {
-        if (restaurante.isEmpty()) { System.out.println("Nu exista restaurante in sesiune. Adauga unul intai."); return null; }
+        List<Restaurant> restaurante = new ArrayList<>(restaurantService.getRestaurante());
+        if (restaurante.isEmpty()) { System.out.println("Nu exista restaurante. Adauga unul intai."); return null; }
         for (int i = 0; i < restaurante.size(); i++) {
             System.out.println("  " + (i + 1) + ") " + restaurante.get(i).getNume());
         }
@@ -368,7 +360,8 @@ public class Meniu {
     }
 
     private Comanda alegeComanda() {
-        if (comenzi.isEmpty()) { System.out.println("Nu exista comenzi in sesiune. Plaseaza una intai."); return null; }
+        List<Comanda> comenzi = orderService.getComenzi();
+        if (comenzi.isEmpty()) { System.out.println("Nu exista comenzi. Plaseaza una intai."); return null; }
         for (int i = 0; i < comenzi.size(); i++) {
             System.out.println("  " + (i + 1) + ") Comanda #" + comenzi.get(i).getId() + " - " + comenzi.get(i).getStatus());
         }
